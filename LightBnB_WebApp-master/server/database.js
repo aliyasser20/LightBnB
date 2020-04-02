@@ -1,12 +1,7 @@
 const properties = require("./json/properties.json");
 const users = require("./json/users.json");
 
-const { Pool } = require("pg");
-const pool = new Pool({
-  host: "localhost",
-  port: 4000,
-  database: "lightbnb"
-});
+const { queryExecute } = require("./db/index");
 
 /// Users
 
@@ -21,7 +16,7 @@ const getUserWithEmail = function(email) {
   SELECT * FROM users WHERE email = $1
   `;
 
-  return pool.query(query, variables).then(resp => resp.rows[0] || null);
+  return queryExecute(query, variables, (rows) => rows[0] || null);
 };
 exports.getUserWithEmail = getUserWithEmail;
 
@@ -36,7 +31,7 @@ const getUserWithId = function(id) {
   SELECT * FROM users WHERE id = $1
   `;
 
-  return pool.query(query, variables).then(resp => resp.rows[0] || null);
+  return queryExecute(query, variables, (rows) => rows[0] || null);
 };
 exports.getUserWithId = getUserWithId;
 
@@ -53,8 +48,8 @@ const addUser =  function(user) {
   VALUES ($1, $2, $3)
   RETURNING *;
   `;
-
-  return pool.query(query, variables).then(resp => resp.rows);
+  
+  return queryExecute(query, variables, (rows) => rows);
 };
 exports.addUser = addUser;
 
@@ -76,7 +71,8 @@ const getAllReservations = function(guest_id, limit = 10) {
   GROUP BY reservations.id, properties.id
   ORDER BY reservations.start_date 
   limit $2;`;
-  return pool.query(query, variables).then(resp => resp.rows);
+
+  return queryExecute(query, variables, (rows) => rows);
 };
 exports.getAllReservations = getAllReservations;
 
@@ -146,8 +142,7 @@ const getAllProperties = function(options, limit = 10) {
   // console.log(queryString, queryParams);
 
   // 6
-  return pool.query(queryString, queryParams)
-    .then(res => res.rows);
+  return queryExecute(queryString, queryParams, (rows) => rows);
 };
 exports.getAllProperties = getAllProperties;
 
@@ -166,6 +161,7 @@ const addProperty = function(property) {
   ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
   RETURNING *;
   `;
-  return pool.query(query, variables).then(resp => resp.rows);
+
+  return queryExecute(query, variables, (rows) => rows);
 };
 exports.addProperty = addProperty;
