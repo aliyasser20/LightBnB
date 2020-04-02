@@ -1,21 +1,21 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 
 module.exports = function(router, database) {
 
   // Create a new user
-  router.post('/', (req, res) => {
+  router.post("/", (req, res) => {
     const user = req.body;
     user.password = bcrypt.hashSync(user.password, 12);
     database.addUser(user)
-    .then(user => {
-      if (!user) {
-        res.send({error: "error"});
-        return;
-      }
-      req.session.userId = user.id;
-      res.send("🤗");
-    })
-    .catch(e => res.send(e));
+      .then(user => {
+        if (!user) {
+          res.send({error: "error"});
+          return;
+        }
+        req.session.userId = user.id;
+        res.send("🤗");
+      })
+      .catch(e => res.send(e));
   });
 
   /**
@@ -25,16 +25,16 @@ module.exports = function(router, database) {
    */
   const login =  function(email, password) {
     return database.getUserWithEmail(email)
-    .then(user => {
-      if (bcrypt.compareSync(password, user.password)) {
-        return user;
-      }
-      return null;
-    });
-  }
+      .then(user => {
+        if (bcrypt.compareSync(password, user.password)) {
+          return user;
+        }
+        return null;
+      });
+  };
   exports.login = login;
 
-  router.post('/login', (req, res) => {
+  router.post("/login", (req, res) => {
     const {email, password} = req.body;
     login(email, password)
       .then(user => {
@@ -48,7 +48,7 @@ module.exports = function(router, database) {
       .catch(e => res.send(e));
   });
   
-  router.post('/logout', (req, res) => {
+  router.post("/logout", (req, res) => {
     req.session.userId = null;
     res.send({});
   });
@@ -73,4 +73,4 @@ module.exports = function(router, database) {
   });
 
   return router;
-}
+};
